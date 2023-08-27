@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Profile from '@components/Profile'
 
 const ProfilePage = () => {
+  const router=useRouter();
   const {data:session} = useSession();
   const [post,setPost] =useState([])
   useEffect(() => {
@@ -16,11 +17,22 @@ const ProfilePage = () => {
     }  
     if(session?.user.id) fetchPosts();
   }, [])
-  const handleEdit=()=>{
-
+  const handleEdit= (post)=>{
+    router.push(`/update-prompt?id=${post._id}`)
   }
-  const handleDelete=()=>{
-
+  const handleDelete= async(postToDelete)=>{
+    const hasComfirmed = confirm("Are you sure you want to delete this prompt?");
+    if(hasComfirmed){
+      try {
+        await fetch(`/api/prompt/${postToDelete._id.toString()}`,{
+          method:'DELETE',
+        });
+        const filteredPost =post.filter((p)=>p._id !== postToDelete._id)
+        setPost(filteredPost);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   }
   return ( 
     <Profile
